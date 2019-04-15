@@ -1,31 +1,31 @@
-﻿Symbol;Company Name
-VZ;Verizon Communications Inc.
-V;Visa Inc.
-MRK;Merck & Co., Inc.
-CSCO;Cisco Systems, Inc.
-PG;The Procter & Gamble Company
-JPM;JPMorgan Chase & Co.
-KO;The Coca-Cola Company
-MSFT;Microsoft Corporation
-TRV;The Travelers Companies, Inc.
-NKE;NIKE, Inc.
-WBA;Walgreens Boots Alliance, Inc.
-MCD;McDonald's Corporation
-WMT;Walmart Inc.
-HD;The Home Depot, Inc.
-BA;The Boeing Company
-AXP;American Express Company
-UTX;United Technologies Corporation
-PFE;Pfizer Inc.
-IBM;International Business Machines Corporation
-CVX;Chevron Corporation
-JNJ;Johnson & Johnson
-DOW;Dow Inc.
-UNH;UnitedHealth Group Incorporated
-MMM;3M Company
-DIS;The Walt Disney Company
-INTC;Intel Corporation
-GS;The Goldman Sachs Group, Inc.
-AAPL;Apple Inc.
-XOM;Exxon Mobil Corporation
-CAT;Caterpillar Inc.
+"","Symbol","Company.Name"
+"1","VZ","Verizon Communications Inc."
+"2","V","Visa Inc."
+"3","MRK","Merck & Co. Inc."
+"4","CSCO","Cisco Systems Inc."
+"5","PG","The Procter & Gamble Company"
+"6","JPM","JPMorgan Chase & Co."
+"7","KO","The Coca-Cola Company"
+"8","MSFT","Microsoft Corporation"
+"9","TRV","The Travelers Companies Inc."
+"10","NKE","NIKE Inc."
+"11","WBA","Walgreens Boots Alliance Inc."
+"12","MCD","McDonald's Corporation"
+"13","WMT","Walmart Inc."
+"14","HD","The Home Depot Inc."
+"15","BA","The Boeing Company"
+"16","AXP","American Express Company"
+"17","UTX","United Technologies Corporation"
+"18","PFE","Pfizer Inc."
+"19","IBM","International Business Machines Corporation"
+"20","CVX","Chevron Corporation"
+"21","JNJ","Johnson & Johnson"
+"22","DOW","Dow Inc."
+"23","UNH","UnitedHealth Group Incorporated"
+"24","MMM","3M Company"
+"25","DIS","The Walt Disney Company"
+"26","INTC","Intel Corporation"
+"27","GS","The Goldman Sachs Group Inc."
+"28","AAPL","Apple Inc."
+"29","XOM","Exxon Mobil Corporation"
+"30","CAT","Caterpillar Inc."
