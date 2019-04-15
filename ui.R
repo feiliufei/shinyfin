@@ -1,4 +1,5 @@
 source('utilities.R')
+
 # Header
 header <- dashboardHeader()
 
@@ -16,8 +17,8 @@ sidebar <- dashboardSidebar(
   
   # sidebar menus
   sidebarMenu(menuItem(text = 'Stock List', tabName = 'stock_list'),
-              menuItem(text = 'Stocks', tabName = 'stocks'),
-              menuItem(text = 'Returns', tabName = 'returns'))
+              menuItem(text = 'Returns', tabName = 'returns'),
+              menuItem(text = 'Risks', tabName = 'risks'))
 )
 
 # Body
@@ -27,7 +28,6 @@ body <- dashboardBody(
     
     # content of stock list
     tabItem(tabName = 'stock_list',
-            
             HTML('Choose stocks\' symbols from the follwing table in the left selectize, then click Submit.'),
             br(),br(),
             
@@ -37,13 +37,16 @@ body <- dashboardBody(
                      dataTableOutput('id_stock')))),
     
     # content of stocks
-    tabItem(tabName = 'stocks',
-            fluidRow(
-              valueBoxOutput('n_stock'),
-              highchartOutput('plot_price'))),
+    tabItem(tabName = 'returns',
+            fluidRow(valueBoxOutput('n_stock'),
+                     valueBoxOutput('ret_annu'),
+                     valueBoxOutput('ret_value')),
+                     br(),br(),
+                     
+            fluidRow(box(highchartOutput('plot_return'), width = 12))),
     
     # content of returns
-    tabItem(tabName = 'returns')
+    tabItem(tabName = 'risks')
   )
 )
 
@@ -52,5 +55,3 @@ shinyUI(dashboardPage(skin = 'green',
                       header = header,
                       sidebar = sidebar,
                       body = body))
-
-

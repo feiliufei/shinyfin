@@ -9,9 +9,7 @@ par(mfrow = c(1,1))
 
 # ---- Return ----
 symbols_all <- 
-  read.csv('djia_comp.csv', sep = ';', stringsAsFactors = F) 
-write.csv(symbols_all, 'djia_comp.csv', sep = ",")
-%>% .[-c(2, 22, 27), ]
+  read.csv('djia_comp.csv', sep = ',', stringsAsFactors = F) %>% .[-c(2, 22, 27), ]
 
 prices <- 
   getSymbols(symbols_all$Symbol_all,
@@ -34,44 +32,43 @@ highchart(type = "stock") %>%
 
 # -------- begin ---------
 # get prices dataset
-symbols_all <- read.csv('djia_comp.csv', sep = ';', stringsAsFactors = F)
-symbols_all <- symbols_all[-c(2, 22, 27), ]
+symbols_all <- read.csv('djia_comp.csv', sep = ',', stringsAsFactors = F) %>% .[-c(2, 22, 27), ]
 prices_daily_all <- as.xts(read.csv.zoo('djia_prices_all.csv', format = "%Y-%m-%d", sep = ""))
 
 #select symbols
 set.seed(123)
-symbols <- sample(symbols_all$Symbol, 6)
+symbols <- sample(symbols_all$Symbol, 7)
 prices_daily <- prices_daily_all[, symbols]
 
 # convert to monthly prices and calculate returns
 prices <- to.monthly(prices_daily, indexAt = "firstof", OHLC = F)
+
 returns <- Return.calculate(prices, method = "log") %>% 
   na.omit()
 
-prices_long <- prices %>%
-  data.frame(date = index(.)) %>%
-  gather(asset, prices, -date)
+returns_df <- xts_to_df(returns)
+returns_wide <- gather(returns_df, symbol, returns, -date)
 
-returns_long <- returns %>%
-  data.frame(date = index(.)) %>%
-  gather(asset, returns, -date)
-
-# monthly returns long format in tibble
-# returns_long <- prices %>% 
+# prices_long <- prices %>%
 #   data.frame(date = index(.)) %>%
-#   remove_rownames() %>% 
-#   gather(asset, prices, -date)%>%
-#   group_by(asset) %>% 
+#   gather(asset, prices, -date)
+# 
+# 
+# returns_long <- 
+#   prices_long %>% 
+#   group_by(asset) %>%
 #   mutate(returns = log(prices) - log(lag(prices))) %>%
 #   select(-prices) %>%
 #   na.omit()
+
+
 hchart(prices_long, 'line', hcaes(x = date, y = prices, group = asset), main = 'Stock Price 1990-2018',
        xlab = 'Time', 
        ylab = "Price in USD")
+
 hchart(returns_long, 'line', hcaes(x = date, y = returns, group = asset))
 
-returns_wide <- returns_long %>%
-  spread(asset, returns)
+
 
 # plot individual histogram
 returns_long %>%
@@ -84,7 +81,8 @@ returns_long %>%
   xlab("monthly returns") + 
   ylab("distribution") +
   theme_update(plot.title = element_text(hjust = 0.5)) +
-  theme_bw()
+  theme_bw
+
 
 # plot return together
 returns_long %>%
@@ -94,18 +92,27 @@ returns_long %>%
   theme_bw()
 
 # portfolio weight
-w <- rep(1/length(symbols), length(symbols))
+w_eq <- rep(1/length(symbols), length(symbols))
 
 # calculate portfolio return
-pf_ret_xts <- Return.portfolio(returns_xts, w, rebalance_on = "months") %>% 
-  `colnames<-`("portfolio")
+ret_eq <- Return.portfolio(returns, weights = w_eq, rebalance_on = 'years') %>%
+  'colnames<-'('Equal_W')
 
-hchart(pf_ret_xts)
+cumsum(cbind(returns, ret_eq)) %>%
+  xts_to_df() %>%
+  gather(symbols, returns, -date) %>%
+  hchart(type = 'line', hcaes(x = date, y = returns, group = symbols))
+
+
+
+
 hchart(hist(pf_ret_xts, breaks = 50, plot = F))
-chart.CumReturns(cbind(returns_xts, pf_ret_xts), 
+chart.CumReturns(cbind(returns, ret_eq), 
                  wealth.index = T, 
                  main = 'Cumulative Return',
                  legend.loc = "topleft")
+
+ret_annu <- Return.annualized.excess(cbind(returns, ret_eq), Rb = 0, scale = 12, geometric = T)
 
 #---- Risk ----
 sd <- data.frame(mean = apply(cbind(returns_xts, pf_ret_xts), 2, mean))
@@ -138,3 +145,6 @@ plot.zoo(prices_daily, plot.type = 'single',
          col = 1:6, main = 'Stock Price 1990-2018',
          xlab = 'Time', ylab = "Price in USD",
          )
+
+highchart(type = 'stock') %>%
+  hc_add_series_returns)
