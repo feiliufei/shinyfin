@@ -1,23 +1,4 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
-
-
-library(shinydashboard)
-library(shiny)
-library(tidyverse)
-library(PerformanceAnalytics)
-library(xts)
-library(PortfolioAnalytics)
-library(highcharter)
-
-
-
+source('utilities.R')
 # Header
 header <- dashboardHeader()
 

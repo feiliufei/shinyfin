@@ -1,14 +1,5 @@
-library(shinydashboard)
-library(shiny)
-library(tidyverse)
-library(PerformanceAnalytics)
-library(xts)
-library(PortfolioAnalytics)
-library(highcharter)
 
-prices_daily_all <- as.xts(read.csv.zoo('djia_prices_all.csv', format = "%Y-%m-%d", sep = ""))
-symbols_all <- read.csv('djia_comp.csv', sep = ';', stringsAsFactors = F)
-symbols_all <- symbols_all[-c(2, 22, 27), ]
+
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {

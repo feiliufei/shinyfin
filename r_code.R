@@ -8,10 +8,13 @@ library('timetk')
 par(mfrow = c(1,1))
 
 # ---- Return ----
-symbols_all <- read.csv('djia_comp.csv', sep = ';', stringsAsFactors = F)
-symbols_all <- symbols_all[-c(2, 22, 27), ]
+symbols_all <- 
+  read.csv('djia_comp.csv', sep = ';', stringsAsFactors = F) 
+write.csv(symbols_all, 'djia_comp.csv', sep = ",")
+%>% .[-c(2, 22, 27), ]
 
-prices <- getSymbols(symbols_all$Symbol_all,
+prices <- 
+  getSymbols(symbols_all$Symbol_all,
                      src = 'yahoo',
                      from = '1988-12-31',
                      to = Sys.Date(),
@@ -20,7 +23,9 @@ prices <- getSymbols(symbols_all$Symbol_all,
   reduce(merge) %>%
   'colnames<-' (symbols_all$Symbol_all)
 
-prices_all <- prices_all['1991-01/']
+prices_all <- 
+  prices_all['1991-01/']
+
 write.zoo(prices_all, 'djia_prices_all.csv')
 
 # single stock candle chart
