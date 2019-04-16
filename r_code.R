@@ -8,23 +8,25 @@ library('timetk')
 par(mfrow = c(1,1))
 
 # ---- Return ----
-symbols_all <- 
-  read.csv('djia_comp.csv', sep = ',', stringsAsFactors = F) %>% .[-c(2, 22, 27), ]
+symbols_all <- read.csv('/Users/Fei/Google Drive/Projects/R Projects/shinyfin/djia_comp.csv', sep = ',', 
+                        stringsAsFactors = F, row.names = NULL) %>% 
+  .[-c(2, 22, 27), ] %>%
+  arrange(Symbol)
 
-prices <- 
-  getSymbols(symbols_all$Symbol_all,
-                     src = 'yahoo',
-                     from = '1988-12-31',
-                     to = Sys.Date(),
-                     auto.assign = T) %>%
-  map(~Ad(get(.))) %>%
-  reduce(merge) %>%
-  'colnames<-' (symbols_all$Symbol_all)
-
-prices_all <- 
-  prices_all['1991-01/']
-
-write.zoo(prices_all, 'djia_prices_all.csv')
+# prices <- 
+#   getSymbols(symbols_all$Symbol_all,
+#                      src = 'yahoo',
+#                      from = '1988-12-31',
+#                      to = Sys.Date(),
+#                      auto.assign = T) %>%
+#   map(~Ad(get(.))) %>%
+#   reduce(merge) %>%
+#   'colnames<-' (symbols_all$Symbol_all)
+# 
+# prices_all <- 
+#   prices_all['1991-01/']
+# 
+# write.zoo(prices_all, 'djia_prices_all.csv')
 
 # single stock candle chart
 highchart(type = "stock") %>%
@@ -32,12 +34,11 @@ highchart(type = "stock") %>%
 
 # -------- begin ---------
 # get prices dataset
-symbols_all <- read.csv('djia_comp.csv', sep = ',', stringsAsFactors = F) %>% .[-c(2, 22, 27), ]
-prices_daily_all <- as.xts(read.csv.zoo('djia_prices_all.csv', format = "%Y-%m-%d", sep = ""))
+prices_daily_all <- as.xts(read.csv.zoo('/Users/Fei/Google Drive/Projects/R Projects/shinyfin/djia_prices_all.csv', 
+                                        format = "%Y-%m-%d", sep = ""))
 
 #select symbols
-set.seed(123)
-symbols <- sample(symbols_all$Symbol, 7)
+symbols <- head(symbols_all$Symbol)
 prices_daily <- prices_daily_all[, symbols]
 
 # convert to monthly prices and calculate returns
@@ -103,48 +104,54 @@ cumsum(cbind(returns, ret_eq)) %>%
   gather(symbols, returns, -date) %>%
   hchart(type = 'line', hcaes(x = date, y = returns, group = symbols))
 
+hchart(xts_to_df(ret_eq), 'scatter', hcaes(x = date, y = Equal_W))
 
-
-
-hchart(hist(pf_ret_xts, breaks = 50, plot = F))
-chart.CumReturns(cbind(returns, ret_eq), 
-                 wealth.index = T, 
-                 main = 'Cumulative Return',
-                 legend.loc = "topleft")
-
+# annually geometric return
 ret_annu <- Return.annualized.excess(cbind(returns, ret_eq), Rb = 0, scale = 12, geometric = T)
 
 #---- Risk ----
-sd <- data.frame(mean = apply(cbind(returns_xts, pf_ret_xts), 2, mean))
-sd$sd <- apply(cbind(returns_xts, pf_ret_xts), 2, sd)
 
-sd %>% ggplot(aes(x = sd, y = mean)) + 
-  geom_point(size = 2) + 
-  ylab("expected return") +
-  xlab("standard deviation") + 
-  ggtitle("Expected Monthly Returns versus Risk") + 
-  scale_y_continuous(labels = function(x){ paste0(x, "%")}) + 
-  theme_update(plot.title = element_text(hjust = 0.5)) + 
-  geom_text(aes(x = sd(pf_ret_xts) * 1.11,
-                 
-                 y =mean(pf_ret_xts),
-                 
-                 label = "Portfolio"))
-
-tk_tbl(pf_ret_xts, preserve_index = TRUE, rename_index = "date")
-
-chart.TimeSeries(prices_daily, 
-                 main = 'Stock Price 1990-2018',
-                 legend.loc = 'topleft', 
-                 xlab = 'Time', 
-                 ylab = "Price in USD",
-                 date.format = '%y-%m')
+# plot of Distribution of 1/n Portfolio Returns
+hchart(hist(ret_eq, breaks = 50, plot = F), name = 'Histogram') %>%
+  hc_add_series(density(ret_eq), color = 'red', name = "Density") %>%
+  hc_title(text = 'Distribution of 1/n Portfolio Returns')
 
 
-plot.zoo(prices_daily, plot.type = 'single', 
-         col = 1:6, main = 'Stock Price 1990-2018',
-         xlab = 'Time', ylab = "Price in USD",
-         )
+sd <- data.frame(mean = apply(cbind(returns, ret_eq), 2, mean),
+                 sd = apply(cbind(returns, ret_eq), 2, sd),
+                 skewness = apply(cbind(returns, ret_eq), 2, skewness),
+                 kurtosis = apply(cbind(returns, ret_eq), 2, kurtosis)) %>%
+  round(4)%>%
+  data.frame(symbol = rownames(.)) %>% 
+  select(symbol, mean, sd, skewness, kurtosis)
+  
+# plot of Expected Monthly Returns versus Risk
+highchart() %>% 
+  hc_add_series(sd, 'scatter', hcaes(x = sd, y = mean, group = symbol)) %>%
+  hc_title(text = 'Expected Monthly Returns versus Risk')
+# 
+# sd %>% ggplot(aes(x = sd, y = mean)) + 
+#   geom_point(size = 2) + 
+#   ylab("expected return") +
+#   xlab("standard deviation") + 
+#   ggtitle("Expected Monthly Returns versus Risk") + 
+#   scale_y_continuous(labels = function(x){ paste0(x, "%")}) + 
+#   theme_update(plot.title = element_text(hjust = 0.5))
 
-highchart(type = 'stock') %>%
-  hc_add_series_returns)
+
+# plot of colored scatter
+xts_to_df(ret_eq) %>%
+  mutate(group = case_when(Equal_W <= mean(ret_eq) - sd(ret_eq) ~ '< mean-sd',
+                           Equal_W >= mean(ret_eq) + sd(ret_eq) ~ '> mean+sd',
+                           TRUE ~ '[mean-sd, mean+sd]')) %>%
+  hchart('scatter', hcaes(x = date, y = Equal_W, group = group)) %>%
+  hc_title(text = 'Colored Scatter')
+
+# rolling sd
+window <- 24
+rolling_sd_eq <- rollapply(ret_eq, FUN = sd, width = window) %>% na.omit
+highchart(type = 'stock') %>% 
+  hc_add_series(rolling_sd_eq, name = '1/n Portfolio') %>%
+  hc_title(text = 'Rolling Volatility') %>%
+  hc_yAxis(labels = list(format = "{value}%"), opposite = FALSE) %>%
+  hc_legend(enabled = TRUE)
